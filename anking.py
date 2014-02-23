@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     # fake gettext because fuck it
     __builtin__.__dict__['_'] = lambda s: s
-    
+
     # load local libs
     import anking.addcards
 
@@ -28,8 +28,9 @@ if __name__ == "__main__":
     parser = optparse.OptionParser()
     parser.usage = "%prog [OPTIONS]"
 
-    parser.add_option("-d", "--deck",    help="start with deck")
-    parser.add_option("-m", "--model",   help="start with model")
+    parser.add_option("-d", "--deck",      help="start with deck")
+    parser.add_option("-m", "--model",     help="start with model")
+    parser.add_option("-n", "--no-change", help="don't change config", action="store_true")
 
     opts, args = parser.parse_args(sys.argv[1:])
 
@@ -46,7 +47,7 @@ if __name__ == "__main__":
         config.update(yaml.load(file(config_path, 'r')))
     else:
         force_write = True
-        
+
     # fake objects for anki parts so we can just steal its code
     mw = MagicMock()
     mw.app = app
@@ -60,9 +61,9 @@ if __name__ == "__main__":
     if "geom" in config:
         (w, h) = config["geom"]
         anking_form.resize(w, h)
-    
+
     # start app
-    anking_form.show()    
+    anking_form.show()
     app.exec_()
 
     # done, write our preferences if they changed
@@ -70,5 +71,5 @@ if __name__ == "__main__":
     new_config = {
         "geom": size,
     }
-    if config != new_config or force_write:
+    if not opts.no_change and (config != new_config or force_write):
         yaml.dump(new_config, file(config_path, 'w+'))
